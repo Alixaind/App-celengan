@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+    body {margin:0px; padding: 0px;}
+    
+    header {background-color :#00012c;color: #ffffff;padding: 10px;text-align: center;}
+    
+    main {padding: 20px;}
+
+    .tambah {border-radius: 20px;padding:10px 20px;border:2px solid  #000158;position: fixed;right: 20px;bottom: 20px;}
+    
+    .data-container {width: 100%; max-width: 700px; margin: 10px auto;}
+
+    .data-item {
+        background-color: #333;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        font-size: 18px;
+        text-align: center; /* Menempatkan teks di tengah secara horizontal */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Menempatkan teks di tengah secara vertikal */
+        align-items: center;
+    }
+
+    .popup {
+        display: none; /* Awalnya disembunyikan */
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        width: 300px;
+        z-index: 1000; /* Pastikan berada di atas elemen lainnya */
+    }
+
+    .popup input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        box-sizing: border-box;
+    }
+
+    .popup button {
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        margin-right: 10px;
+        border-radius: 5px;
+    }
+    
+    .popup .ok-btn {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .popup .cancel-btn {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .gambar-item {
+    width: 300px; /* Atur ukuran lebar gambar sesuai kebutuhan */
+    height: 200px; /* Atur ukuran tinggi gambar sesuai kebutuhan */
+    margin-bottom: 10px; /* Memberikan jarak antara gambar dan teks */
+    border-radius: 5px; /* Tambahkan border radius jika ingin gambar berbentuk persegi */
+    object-fit: cover; /* Agar gambar sesuai dengan ukuran kotak */
+}
+
+    .imgpreviw {
+      width: 100px;
+      height: 50px;
+    }
+    /* Overlay untuk latar belakang gelap saat pop-up muncul */
+    .overlay {
+        display: none; /* Awalnya disembunyikan */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 500;
+    }
+      
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+          <h1>CELENGANKU</h1>
+        </nav>
+    </header>
+
+    <main>
+      <h5 class="noDataText">tidak ada data yg ditampilkan</h5>
+      <div class="data-container"></div>
+      <button class="tambah">+ Tambah Tabungan</button>
+      
+      <div class="overlay"></div>
+      <div class="popup">
+        <h3>Tambah Tabungan</h3>
+        <input type="file" id="gambarinpt" accept="image/*">
+        <img id="imgprev" class="imgpreviw" src="" alt="gambar preview" style="display : none;">
+        <input type="text" placeholder="Nama Tabungan" id="namaimput">
+        <input type="number" placeholder="Target Tabungan" id="nominalimput">
+        <button class="ok-btn">OK</button>
+        <button class="cancel-btn">Batal</button>
+      </div>
+      
+    </main>
+
+    <footer>
+    </footer>
+    
+    <script>
+        const tambahBtn = document.querySelector('.tambah');
+        const popup = document.querySelector('.popup');
+        const placeholderImgUrl = "https://placehold.co/600x400/000000/FFF";
+        const gambarInput = document.getElementById('gambarinpt')
+        const gambarprev = document.getElementById('imgprev')
+        const overlay = document.querySelector('.overlay');
+        const btnBatal = document.querySelector('.cancel-btn');
+        const btnOk = document.querySelector('.ok-btn');
+        const dataContainer = document.querySelector('.data-container');
+        const noDataText = document.querySelector('.noDataText');
+
+        // Tampilkan pop-up saat tombol tambah diklik
+        tambahBtn.addEventListener('click', () => {
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+        });
+
+        // Sembunyikan pop-up saat tombol batal diklik
+        btnBatal.addEventListener('click', () => {
+    popup.style.display = 'none';
+    overlay.style.display = 'none';
+    // Reset input setelah klik Batal
+    document.getElementById('namaimput').value = '';
+    document.getElementById('nominalimput').value = '';
+    document.getElementById('gambarinpt').value = ''; 
+    gambarprev.src = '';
+    gambarprev.style.display = 'none';
+});
+        
+        //penanganan preview gambar 
+        gambarInput.addEventListener('change', () => {
+          if (gambarInput.files && gambarInput.files [0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              gambarprev.src = e.target.result;
+              gambarprev.style.display = 'block';
+            };
+            reader.readAsDataURL(gambarInput.files[0]);
+          } else { 
+            gambarprev.src ='';
+            gambarprev.style.display = 'none';
+            }
+          });
+        // Menambahkan data ke dalam main ketika tombol OK diklik
+        btnOk.addEventListener('click', () => {
+    const name = document.getElementById('namaimput').value;
+    const amount = document.getElementById('nominalimput').value;
+    
+    if(!name) {
+      alert("nama tabungan harus di isi");
+      return;
+    }
+    
+    if(!amount) {
+      alert("nominal harus di isi");
+      return;
+        }
+      
+    let imgUrl = placeholderImgUrl; // Pastikan ini didefinisikan sebelum saveData dipanggil.
+
+if (gambarInput.files && gambarInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        imgUrl = e.target.result; // Set nilai imgUrl setelah gambar terbaca
+        saveData(name, amount, imgUrl);
+    };
+    reader.readAsDataURL(gambarInput.files[0]);
+} else {
+    saveData(name, amount, imgUrl); // Tetap panggil saveData walaupun tidak ada gambar.
+}
+});
+
+function saveData(name, amount, imgUrl) {
+    if (name && amount) {
+        const newData = { name, amount, imgUrl };
+
+        let existingData = JSON.parse(localStorage.getItem('tabunganData')) || [];
+        existingData.push(newData);
+
+        localStorage.setItem('tabunganData', JSON.stringify(existingData));
+
+        // Tambahkan data ke tampilan
+        addDataToView(name, amount, imgUrl);
+
+        // Redirect ke halaman data.html
+        window.location.href = `data.html?name=${encodeURIComponent(name)}&amount=${encodeURIComponent(amount)}&imgUrl=${encodeURIComponent(imgUrl)}`;
+    }
+}
+
+function loadExistingData() {
+    const existingData = JSON.parse(localStorage.getItem('tabunganData')) || [];
+
+    if (existingData.length > 0) {
+        noDataText.style.display = 'none'; // Sembunyikan teks jika ada data
+
+        existingData.forEach(data => {
+            addDataToView(data.name, data.amount, data.imgUrl);
+        });
+    }
+}
+
+// Load data yang sudah ada ketika halaman di-load
+window.onload = loadExistingData;
+function addDataToView(name, amount, imgUrl) {
+    if (name && amount) {
+        // Buat elemen baru untuk menampilkan data
+        const newData = document.createElement('div');
+        newData.classList.add('data-item');
+        newData.innerHTML = `<img src="${imgUrl}" alt="${name}" class="gambar-item"><div><strong>${name}</strong></div><div>Rp${parseInt(amount).toLocaleString('id-ID')}</div>`;
+        newData.addEventListener('click', () => {
+          window.location.href = `data.html?name=${encodeURIComponent(name)}&amount=${encodeURIComponent(amount)}&imgUrl=${encodeURIComponent(imgUrl)}`;
+        }
+        );
+        // Tambahkan elemen baru ke dalam data-container
+        dataContainer.appendChild(newData);
+
+        // Sembunyikan teks "tidak ada data yg ditampilkan" jika ada data
+        noDataText.style.display = 'none';
+
+        // Tutup pop-up dan overlay
+        popup.style.display = 'none';
+        overlay.style.display = 'none';
+        
+        // Bersihkan input setelah menambahkan
+        document.getElementById('namaimput').value = '';
+        document.getElementById('nominalimput').value = '';
+        document.getElementById('gambarinpt').value = ''; // Reset input gambar
+        gambarprev.src = '';
+        gambarprev.style.display = 'none';
+    }
+}
+
+        // Sembunyikan pop-up saat mengklik di luar pop-up (overlay)
+        overlay.addEventListener('click', () => {
+            popup.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+        
+        console.log(imgUrl); // Tambahkan ini untuk memeriksa URL gambar
+    </script>
+</body>
+</html>

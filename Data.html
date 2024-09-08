@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Tabungan</title>
+    <style>
+        *{margin:0px;}
+        body {font-family: Arial, sans-serif;}
+        header {background-color :#00012c;color: #ffffff;padding: 10px;display:flex; justify-content: space-between;}
+        .container {max-width: 600px; margin: auto; padding: 20px;align-items:center;}
+        .container2 {display: flex; flex-wrap: wrap; gap: 10px;margin-top:20px;}
+        .tabungan-img {width: 300px; height: 200px; object-fit: cover; margin-bottom: 20px;}
+        .opsi {  width: calc(20% - 20px);height: 85px;border: 2px solid #000000; border-radius: 50%; background-color: #054f9e;color: white;display: flex;align-items: center;justify-content: center;font-size: 16px;cursor: pointer;margin-right: 10px;}
+        .popup {
+        display: none; /* Awalnya disembunyikan */
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        width: 300px;
+        z-index: 1000; /* Pastikan berada di atas elemen lainnya */
+    }
+
+    .popup input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        box-sizing: border-box;
+    }
+
+    .popup button {
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        margin-right: 10px;
+        border-radius: 5px;
+    }
+    
+    .popup .ok-btn {
+        background-color: #28a745;
+        color: white;
+    }
+    .popup .cancel-btn {
+        background-color: #dc3545;
+        color: white;
+    }
+    .overlay {
+        display: none; /* Awalnya disembunyikan */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 500;
+    }
+    .result {top: 5px;}
+    </style>
+</head>
+<body>
+  <header>
+<h1 id="namaTabungan"></h1> 
+<p class="edit">edit</p>
+<p class="hapus"> hapus</p>
+<div class="overlay"></div>
+      <div class="popup">
+        <h3>Tambah Tabungan</h3>
+        <input type="file" id="gambarinpt" accept="image/*">
+        <img id="imgprev" class="imgpreviw" src="" alt="gambar preview" style="display : none;">
+        <input type="text" placeholder="Nama Tabungan" id="namaimput">
+        <input type="number" placeholder="Target Tabungan" id="nominalimput">
+        <button class="ok-btn">OK</button>
+        <button class="cancel-btn">Batal</button>
+      </div>
+  </header>
+    <div class="container">
+        <img id="gambarTabungan" class="tabungan-img" src="" alt="Gambar Tabungan">
+        <p id="nominalTabungan"></p>
+        <p class="result" id="terkumpul">Rp</p>
+        <div class="container2">
+        <button class="opsi">10.000</button>
+        <button class="opsi">10.000</button>
+        <button class="opsi">10.000</button>
+        <button class="opsi">10.000</button>
+        <button class="opsi">10.000</button>
+        <button class="opsi">10.000</button>
+        <button class="opsi">10.000</button>
+        <button class="opsi">10.000</button>
+        <button class="opsi">10.000</button>
+        <button class="opsi">10.000</button>
+        </div>
+    </div>
+
+    <script>
+      const Edit = document.querySelector('.edit');
+      const popup = document.querySelector('.popup');
+      const overlay = document.querySelector('.overlay');
+      const btnBatal = document.querySelector('.cancel-btn');
+      const btnOk = document.querySelector('.ok-btn');
+      const Hapus = document.querySelector('.hapus');
+      
+      Edit.addEventListener('click', () => {
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+        });
+      
+      btnBatal.addEventListener('click', () => {
+        popup.style.display = 'none';
+        overlay.style.display = 'none';
+        document.getElementById('namaimput').value = '';
+        document.getElementById('nominalimput').value = '';
+        document.getElementById('gambarinpt').value = ''; 
+        gambarprev.src = '';
+        gambarprev.style.display = 'none';
+      });
+
+      Hapus.addEventListener('click', () => {
+        const confirmed = confirm("Apakah kamu yakin ingin menghapus data ini?");
+        if (confirmed) {
+            hapusData();  // Panggil fungsi untuk hapus data
+        }
+      });
+
+      // Fungsi untuk menghapus data dan kembali ke halaman awal
+      function hapusData() {
+        // Ambil data dari query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const name = urlParams.get('name');
+        const amount = urlParams.get('amount');
+        const imgUrl = urlParams.get('imgUrl');
+
+        if (!name || !amount || !imgUrl) {
+            alert('Data tidak valid untuk dihapus.');
+            return;
+        }
+
+        // Ambil data yang ada di localStorage
+        let existingData = JSON.parse(localStorage.getItem('tabunganData')) || [];
+
+        // Filter data untuk menghapus item yang sesuai
+        existingData = existingData.filter(data => data.name !== name || data.amount !== amount || data.imgUrl !== imgUrl);
+
+        // Simpan kembali data yang sudah difilter ke localStorage
+        localStorage.setItem('tabunganData', JSON.stringify(existingData));
+        // Arahkan kembali ke halaman awal
+        window.location.href = 'New file.txt.html';
+      }
+
+      window.onload = function() {
+        // Ambil data dari query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const name = urlParams.get('name');
+        const amount = urlParams.get('amount');
+        const imgUrl = urlParams.get('imgUrl');
+
+        // Pastikan data ada
+        if (name && amount && imgUrl) {
+            renderData(name, amount, imgUrl);
+        } else {
+            alert('Data tidak ditemukan!');
+        }
+      };
+
+      // Fungsi untuk menampilkan data ke dalam HTML
+      function renderData(name, amount, imgUrl) {
+        // Mengisi data ke dalam elemen HTML
+        document.getElementById('namaTabungan').textContent = name;
+        document.getElementById('nominalTabungan').textContent = `Rp${parseInt(amount).toLocaleString('id-ID')}`;
+        
+        if (imgUrl) {
+            document.getElementById('gambarTabungan').src = imgUrl;
+        } else {
+            document.getElementById('gambarTabungan').src = 'https://placehold.co/600x400/000000/FFF'; // Gambar default jika tidak ada gambar
+        }
+      }
+    </script>
+</body>
+</html>
